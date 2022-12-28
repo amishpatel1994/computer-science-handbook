@@ -4,8 +4,6 @@ A RESTful API is an application programming interface (API) that follows the RES
 
 ## RESTful API Components
 
-RESTful API Components
-
 1. Client: The client is the user of the API and can be a web browser, mobile app, or any other application that sends requests to the server.
 
 2. Server: The server is the provider of the API and is responsible for processing the requests from the client and returning a response.
