@@ -18,8 +18,6 @@ Authorization is the process of granting or denying access to resources based on
 
 ## Best practices for authorization
 
-Here are some best practices for implementing authorization in software:
-
 - **Use attribute-based and role-based authorization**: Use attribute-based authorization in conjunction with role-based authorization to further restrict access to resources.
 
 - **Implement least privilege**: Implement the principle of least privilege, which states that users should only have access to the resources that they need to perform their duties. This helps to minimize the risk of unauthorized access to sensitive information.

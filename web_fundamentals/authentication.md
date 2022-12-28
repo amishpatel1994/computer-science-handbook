@@ -32,11 +32,11 @@ Authentication is important because it helps to ensure that only authorized user
   The authorization code to access token exchange is performed through a process called "authorization code grant." This process involves the following steps:
 
   1. The third-party application sends a request to the authorization server (which is typically run by the provider such as Google or Facebook) to exchange the authorization code for an access token. This request is sent using an HTTP POST request and includes the following parameters:
-    * client_id: the client ID of the third-party application
-    * client_secret: the client secret of the third-party application
-    * code: the authorization code that was received from the authorization server
-    * redirect_uri: the redirect URI that was specified when the authorization code was originally requested
-    * grant_type: the grant type, which is set to authorization_code to indicate that an authorization code is being exchanged for an access token
+      * client_id: the client ID of the third-party application
+      * client_secret: the client secret of the third-party application
+      * code: the authorization code that was received from the authorization server
+      * redirect_uri: the redirect URI that was specified when the authorization code was originally requested
+      * grant_type: the grant type, which is set to authorization_code to indicate that an authorization code is being exchanged for an access token
   2. The authorization server verifies the request and, if it is valid, sends an HTTP POST response containing the access token and possibly other information such as the token type and expiration time.
   3. The third-party application receives the access token and can use it to request data on behalf of the user.
 
