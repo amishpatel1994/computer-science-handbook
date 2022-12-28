@@ -1,3 +1,5 @@
+## How does a web page get rendered when you enter "example.com" on web browser?
+
 1. You open your web browser and type a URL into the address bar. The URL consists of a protocol (such as "http" or "https"), a domain name (such as "example.com"), and possibly a path to a specific resource on the server (such as "/about").
 
 2. Your computer looks up the IP address for the domain name specified in the URL using the Domain Name System (DNS). DNS is a distributed database that maps domain names to IP addresses, allowing computers to access websites and other online resources using familiar, easy-to-remember names. Here's a detailed explanation of the DNS resolution process:
