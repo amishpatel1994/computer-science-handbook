@@ -7,3 +7,6 @@ Central repository to hold review notes for various computer science topics.
 3. [RESTful API](web_fundamentals/REST.md)
 4. [Authentication](web_fundamentals/authentication.md)
 5. [Authorization](web_fundamentals/authorization.md)
+
+## Databases
+1. [Database Basics](databases/database_basics.md)
