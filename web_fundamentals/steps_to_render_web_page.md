@@ -1,54 +1,83 @@
 ## How does a web page get rendered when you enter "example.com" on web browser?
 
-1. You open your web browser and type a URL into the address bar. The URL consists of a protocol (such as "http" or "https"), a domain name (such as "example.com"), and possibly a path to a specific resource on the server (such as "/about").
-
-2. Your computer looks up the IP address for the domain name specified in the URL using the Domain Name System (DNS). DNS is a distributed database that maps domain names to IP addresses, allowing computers to access websites and other online resources using familiar, easy-to-remember names. Here's a detailed explanation of the DNS resolution process:
-
-    - Your computer sends a request to a DNS resolver. A DNS resolver is a program that is responsible for translating domain names into IP addresses.
+```mermaid
+sequenceDiagram
+    participant U as User/Browser
+    participant L as Local DNS Cache
+    participant R as DNS Resolver
+    participant Root as Root DNS
+    participant TLD as TLD Server
+    participant Auth as Authoritative NS
+    participant W as Web Server
     
-    - The DNS resolver first checks its local cache to see if it already has the IP address for the requested domain name. If it does, it returns the IP address to the computer, and the process is complete.
+    U->>L: 1. DNS Query: example.com
+    Note over U,L: Check local DNS cache
     
-    - If the DNS resolver does not have the IP address in its cache, it sends a request to a local DNS server. A DNS server is a program that is responsible for storing and managing DNS records, which contain information about domain names and their corresponding IP addresses.
+    alt Cache Hit
+        L-->>U: Return cached IP
+    else Cache Miss
+        L->>R: Forward query
+        R->>Root: Query root servers
+        Root-->>R: TLD server info
+        R->>TLD: Query .com TLD
+        TLD-->>R: Auth NS info
+        R->>Auth: Query Auth NS
+        Auth-->>R: IP for example.com
+        R-->>U: Return IP address
+    end
     
-    - The local DNS server checks its own cache and, if it has the IP address for the requested domain name, it returns it to the DNS resolver. If it does not have the IP address in its cache, it sends a request to a root DNS server.
-    
-    - A root DNS server is a server that is responsible for directing DNS requests to the appropriate top-level domain (TLD) server. A TLD is the last part of a domain name (such as ".com" or ".net"). There are 13 root DNS servers in total, and they are distributed around the world to ensure fast and reliable DNS resolution.
-    
-    - The root DNS server receives the request and looks up the IP address of the appropriate TLD server based on the domain name's TLD. It then sends a request to the TLD server.
-    
-    - The TLD server receives the request and looks up the IP address of the domain's name server based on the domain name. It then sends a request to the name server.
-    
-    - The name server receives the request and looks up the IP address of the domain based on the domain name. It then sends the IP address back to the TLD server.
-    
-    - The TLD server sends the IP address back to the root DNS server.
-    
-    - The root DNS server sends the IP address back to the local DNS server.
-    
-    - The local DNS server sends the IP address back to the DNS resolver.
+    U->>W: HTTP(S) Request
+    W-->>U: HTTP(S) Response
+    Note over U: Browser renders page
+```
 
-    - The DNS resolver sends the IP address back to the computer.
+1. **Initial Browser Request (URL Parsing)**
+   When you enter a URL like "example.com" in the browser, it begins by parsing the URL into its fundamental components. The browser identifies the protocol, which defaults to HTTPS if not specified. It then extracts the domain name, which in this case would be "example.com". If no specific path is provided, the browser defaults to "/". The browser also processes any query parameters that follow a question mark and any fragment identifiers that come after a hash symbol in the URL.
 
-This process may involve multiple DNS servers and multiple requests before the final IP address is returned to the computer. However, the process is typically very fast, as DNS servers use caching to store frequently-requested domain names and their corresponding IP addresses, allowing subsequent requests to be resolved more quickly.
+2. **DNS Resolution Process**
+   The Domain Name System (DNS) resolution process converts a human-readable domain name into an IP address through several steps:
 
-3. Your computer sends a request for the specified resource to your router, which is responsible for connecting your computer to the internet.
+   a) **Local DNS Cache Check**
+      The resolution process begins with checking various local caches. First, the browser examines its internal DNS cache for recent lookups. If not found there, the operating system checks its own DNS cache. As a final local check, the system consults the hosts file (located at /etc/hosts on Unix systems), which can contain manual DNS entries.
+   
+   b) **Recursive DNS Resolution**
+      If the IP address isn't found locally, the query is forwarded to a configured DNS resolver. Several popular public DNS resolvers are available, including Google Public DNS (8.8.8.8, 8.8.4.4), Cloudflare (1.1.1.1), and OpenDNS (208.67.222.222). These services handle the recursive resolution process on behalf of the client.
+   
+   c) **DNS Query Chain**
+      The DNS resolution follows a hierarchical chain of servers. The process starts with Root DNS Servers, which direct queries to the appropriate Top-Level Domain Servers (like .com or .org). These TLD servers then point to the Authoritative Name Servers that hold the actual DNS records for the domain. Each step in this chain provides increasingly specific information about the domain's location.
 
-4. The router receives the request and uses its routing table to determine the most efficient path for the request to take.
+3. **TCP/IP Connection Establishment**
+   Once the browser obtains the IP address, it initiates a TCP connection with the server. For HTTPS connections, a TLS handshake follows a specific sequence: The client begins with a Client Hello message containing supported cipher suites, followed by the server's response with its chosen cipher suite. The server then presents its digital certificate, and both parties engage in a key exchange process. This results in a secure, encrypted connection between the client and server.
 
-5. The router sends the request to your internet service provider (ISP), which is responsible for connecting you to the internet.
+4. **HTTP Request Processing**
+   The browser constructs and sends an HTTP request to the server. A typical request includes several important headers:
+     ```http
+     GET / HTTP/1.1
+     Host: example.com
+     User-Agent: Mozilla/5.0 ...
+     Accept: text/html,application/xhtml+xml,...
+     Accept-Language: en-US,en;q=0.9
+     Connection: keep-alive
+     ```
+   The server receives this request and processes it according to its configuration and the requested resource.
 
-6. The ISP receives the request and uses its own routing table to determine the most efficient path for the request to take.
+5. **Server Response**
+   The server processes the request and responds with an HTTP response that includes headers and the requested content:
+     ```http
+     HTTP/1.1 200 OK
+     Content-Type: text/html
+     Content-Length: 12345
+     Cache-Control: max-age=3600
+     
+     <!DOCTYPE html>
+     <html>...
+     ```
 
-7. The ISP sends the request to the appropriate server on the internet using the IP address that was resolved in step 2.
+6. **Browser Rendering Process**
+   The browser's rendering engine follows a sophisticated process to convert the received HTML into a visible webpage. It begins with DOM construction, parsing the HTML document into a tree structure that represents the page's content. Simultaneously, it processes any CSS into the CSSOM (CSS Object Model), which defines the styling rules for the page. These two structures are combined into a render tree, which contains only the elements that will be visible on the page. The browser then calculates the exact position and size of each element in the layout phase, followed by the paint phase where it converts the render tree into actual pixels on the screen. Finally, the compositing phase manages different layers of the page for optimal display and scrolling performance.
 
-8. The server receives the request and processes it using the appropriate communication protocol (such as HTTP).
-
-9. The server retrieves the requested resource from its database or file system and prepares it for transmission.
-
-10. The server sends the requested resource back to your computer via the ISP and router.
-
-11. Your web browser receives the requested resource and renders it for you to view.
-
-This process occurs in a matter of milliseconds, allowing you to access the requested resource almost instantly.
+7. **Post-Rendering Operations**
+   After the initial page render, the browser continues with several important tasks. It executes JavaScript code that may modify the page's content or behavior. The browser loads additional assets such as images, videos, and other media files. It sets up event handlers to respond to user interactions, and may make additional API calls to fetch dynamic content. These operations continue throughout the page's lifecycle to maintain interactivity and update content as needed.
 
 ### DNS Resolvers
 
